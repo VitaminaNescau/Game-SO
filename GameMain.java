@@ -33,13 +33,20 @@ public class GameMain {
         players.get(i).start();
 
     }
-
-    while (true){
-        for (int i = 0; i < players.size(); i++) {
-            System.out.println(players.get(i).name+": "+players.get(i).getState());
+    new Thread(()->{
+        while (true){
+            for (int i = 0; i < players.size(); i++) {
+                System.out.println(players.get(i).name+": "+players.get(i).getState());
+            }
+            //break;
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
-        //break;
-    }
+    }).start();
+
 //        executorService.shutdown();
     }
     public  synchronized void produce() throws InterruptedException {

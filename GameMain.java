@@ -6,7 +6,8 @@ import java.util.concurrent.Executors;
 /** Project for operating system matter*/
 public class GameMain {
     final static int playerNumber = 2;
-    static ExecutorService executorService = Executors.newFixedThreadPool(playerNumber);
+    static final Object lock = new Object();
+     static ExecutorService executorService = Executors.newFixedThreadPool(playerNumber);
     static int round = 5;
     static ArrayList<Player> players = new ArrayList<>();
     static HashMap<Integer, Country> countries = new HashMap<>
@@ -30,24 +31,26 @@ public class GameMain {
     for (int i = 0; i < playerNumber; i++) {
         players.add(new Player("Player "+i ));
         //executorService.execute(players.get(i));
-        players.get(i).start();
+       players.get(i).start();
 
     }
     new Thread(()->{
         while (true){
+            int valid = 0;
             for (int i = 0; i < players.size(); i++) {
-                System.out.println(players.get(i).name+": "+players.get(i).getState());
+               // System.out.println(players.get(i).getState().name());
+                if (players.get(i).getState().name().equals("WAITING")){
+                    valid++;
+                };
             }
-            //break;
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if (valid==playerNumber){
+                /** Trade message or semaphore?*/
+                synchronized (lock) {lock.notifyAll();}
+                break;
             }
         }
     }).start();
 
-//        executorService.shutdown();
     }
     public  synchronized void produce() throws InterruptedException {
 

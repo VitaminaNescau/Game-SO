@@ -9,6 +9,7 @@ public class Player extends Thread {
     public Set<Country> domains = new HashSet<Country>();
 
     public Player(String name) {
+        super(name);
         this.name = name;
     }
     public void RandomAttack(){
@@ -30,16 +31,23 @@ public class Player extends Thread {
                 break;
             }
         }
-        System.out.println("Finalizado");
-//            while(true){
-//                System.out.println(1);
-//                try {
-//                    Thread.sleep(10000);
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//                break;
-//            }
+        //System.out.println("lock");
+        synchronized (GameMain.lock){
+            try {
+                System.out.println(Thread.currentThread().getName()+" Waiting...");
+                GameMain.lock.wait();
+                System.out.println(Thread.currentThread().getName()+" Finished");
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        while(true){
+            System.out.println("Init round: "+GameMain.round);
+            break;
+        }
+
+
+
 
     }
 }

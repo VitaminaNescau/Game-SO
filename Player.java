@@ -36,14 +36,22 @@ public class Player extends Thread {
             try {
                 System.out.println(Thread.currentThread().getName()+" Waiting...");
                 GameMain.lock.wait();
-                System.out.println(Thread.currentThread().getName()+" Finished");
+                //System.out.println(Thread.currentThread().getName()+" Init ");
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        while(true){
-            System.out.println("Init round: "+GameMain.round);
-            break;
+        for (int i = 1; i <= GameMain.round; i++) {
+            System.out.println(name+" ataca "+GameMain.countries.get(6).name+" que é dominado por "+GameMain.countries.get(6).domain);
+            synchronized (GameMain.lock){
+                try {
+                    System.out.println("Aguardando outros player");
+                    GameMain.lock.wait();
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
 

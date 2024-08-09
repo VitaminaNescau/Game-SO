@@ -34,22 +34,7 @@ public class GameMain {
        players.get(i).start();
 
     }
-    new Thread(()->{
-        while (true){
-            int valid = 0;
-            for (int i = 0; i < players.size(); i++) {
-               // System.out.println(players.get(i).getState().name());
-                if (players.get(i).getState().name().equals("WAITING")){
-                    valid++;
-                };
-            }
-            if (valid==playerNumber){
-                /** Trade message or semaphore?*/
-                synchronized (lock) {lock.notifyAll();}
-                break;
-            }
-        }
-    }).start();
+    new Thread(new Verify()).start();
 
     }
     public  synchronized void produce() throws InterruptedException {
@@ -59,4 +44,23 @@ public class GameMain {
 
     }
 
+}
+/** Trade message or semaphore?*/
+class Verify implements Runnable{
+    public void run() {
+        while (true){
+            int valid = 0;
+            for (int i = 0; i < GameMain.players.size(); i++) {
+                // System.out.println(players.get(i).getState().name());
+                if (GameMain.players.get(i).getState().name().equals("WAITING")){
+                    valid++;
+                };
+            }
+            if (valid==GameMain.playerNumber){
+                System.out.println("All players are ready");
+                synchronized (GameMain.lock) {GameMain.lock.notifyAll();}
+                // break;
+            }
+        }
+    }
 }

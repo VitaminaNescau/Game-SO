@@ -1,13 +1,10 @@
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Player extends Thread {
 
     public String name;
     public int life = 100;
     public Set<Country> domains = new HashSet<Country>();
-
     public Player(String name) {
         super(name);
         this.name = name;
@@ -26,11 +23,20 @@ public class Player extends Thread {
             int number = new Random().nextInt(GameMain.playerNumber);
 
             if (GameMain.countries.get(number).GetDomain() == null){
-                GameMain.countries.get(number).SetDomain(name);
-                domains.add(GameMain.countries.get(number));
-                break;
+                try {
+                    GameMain.countries.get(number).SetDomain(name);
+                    domains.add(GameMain.countries.get(number));
+                    break;
+                }catch (RuntimeException e){
+                    System.out.println(name + e.getMessage());
+                }
+
             }
         }
+
+
+        ArrayList<Country> t = new ArrayList<>(GameMain.countries.values());
+        t.removeAll(domains);
         //System.out.println("lock");
         synchronized (GameMain.lock){
             try {
@@ -42,12 +48,15 @@ public class Player extends Thread {
             }
         }
         for (int i = 1; i <= GameMain.round; i++) {
-            System.out.println(name+" ataca "+GameMain.countries.get(6).name+" que é dominado por "+GameMain.countries.get(6).domain);
+            int number = new Random().nextInt(t.size());
+            System.out.println(name+" ataca "+t.get(number).name+" que é dominado por "+( t.get(number).domain==null?"ninguém":t.get(number).domain));
+
+            t.remove(number);
             synchronized (GameMain.lock){
                 try {
                     System.out.println("Aguardando outros player");
                     GameMain.lock.wait();
-                    Thread.sleep(10000);
+                    if (GameMain.DEV_MODE) Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

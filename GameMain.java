@@ -5,9 +5,10 @@ import java.util.concurrent.Executors;
 //TODO use wait and notify for switch message, create variable type integer for semaphore
 /** Project for operating system matter*/
 public class GameMain {
+    static final boolean DEV_MODE = true;
     final static int playerNumber = 2;
     static final Object lock = new Object();
-     static ExecutorService executorService = Executors.newFixedThreadPool(playerNumber);
+    //static ExecutorService executorService = Executors.newFixedThreadPool(playerNumber);
     static int round = 5;
     static ArrayList<Player> players = new ArrayList<>();
     static HashMap<Integer, Country> countries = new HashMap<>
@@ -46,7 +47,7 @@ public class GameMain {
 
 }
 /** Trade message or semaphore?*/
-class Verify implements Runnable{
+class Verify implements Runnable  {
     public void run() {
         while (true){
             int valid = 0;
@@ -57,8 +58,16 @@ class Verify implements Runnable{
                 };
             }
             if (valid==GameMain.playerNumber){
-                System.out.println("All players are ready");
-                synchronized (GameMain.lock) {GameMain.lock.notifyAll();}
+
+                try {
+                    System.out.println("All players are ready");
+                    Thread.sleep(2000);
+
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }finally {
+                    synchronized (GameMain.lock) {GameMain.lock.notifyAll();}
+                }
                 // break;
             }
         }

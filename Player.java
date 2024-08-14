@@ -3,15 +3,21 @@ import java.util.*;
 public class Player extends Thread {
 
     public String name;
-    public int life = 100;
+    public int score = 100;
     public Set<Country> domains = new HashSet<Country>();
     public Player(String name) {
         super(name);
         this.name = name;
     }
-    public void RandomAttack(){
-        int number = new Random().nextInt(GameMain.playerNumber);
-        if (!domains.add(GameMain.countries.get(number))){}
+
+    public int randomDamageAttack(){
+        try {
+            GameMain.semaphore.acquire();
+          var n =  new Random().nextInt(100);
+            return n;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -35,9 +41,6 @@ public class Player extends Thread {
         }
 
 
-        ArrayList<Country> t = new ArrayList<>(GameMain.countries.values());
-        t.removeAll(domains);
-        //System.out.println("lock");
         synchronized (GameMain.lock){
             try {
                 System.out.println(Thread.currentThread().getName()+" Waiting...");
@@ -47,16 +50,25 @@ public class Player extends Thread {
                 throw new RuntimeException(e);
             }
         }
-        for (int i = 1; i <= GameMain.round; i++) {
-            int number = new Random().nextInt(t.size());
-            System.out.println(name+" ataca "+t.get(number).name+" que é dominado por "+( t.get(number).domain==null?"ninguém":t.get(number).domain));
+        while(GameMain.round >0) {
+            int number = new Random().nextInt(GameMain.countries.size());
 
-            t.remove(number);
+            try {
+                GameMain.countries.get(number).invasion(randomDamageAttack());
+                System.out.println(name+" attack "+GameMain.countries.get(number).name);
+                if (GameMain.DEV_MODE) Thread.sleep(2000);
+            }catch (RuntimeException | InterruptedException e){
+                System.out.println( name + e.getMessage());
+            }finally {
+
+                GameMain.semaphore.release();
+            }
+
             synchronized (GameMain.lock){
                 try {
                     System.out.println("Aguardando outros player");
                     GameMain.lock.wait();
-                    if (GameMain.DEV_MODE) Thread.sleep(5000);
+                    if (GameMain.DEV_MODE) Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

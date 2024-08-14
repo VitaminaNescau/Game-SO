@@ -1,30 +1,33 @@
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 //TODO use wait and notify for switch message, create variable type integer for semaphore
 /** Project for operating system matter*/
 public class GameMain {
     static final boolean DEV_MODE = true;
-    final static int playerNumber = 2;
+    final static int playerNumber = 8;
+    /**Mutex*/
     static final Object lock = new Object();
+    /**Semaphore*/
+    static SemaphoreCustom semaphore = new SemaphoreCustom(2);
     //static ExecutorService executorService = Executors.newFixedThreadPool(playerNumber);
     static int round = 5;
     static ArrayList<Player> players = new ArrayList<>();
-    static HashMap<Integer, Country> countries = new HashMap<>
-            ( Map.of(
-                    0, new Country("Brasil"),
-                    1, new Country("Espanha"),
-                    2, new Country("França"),
-                    3, new Country("Alemanha"),
-                    4, new Country("Itália"),
-                    5, new Country("Portugal"),
-                    6, new Country("Reino Unido"),
-                    7, new Country("Estados Unidos"),
-                    8, new Country("Canadá")
-            )
-            );
-
+    static ArrayList<Country> countries = new ArrayList<>(
+        List.of(
+                new Country("Brasil"),
+                new Country("Espanha"),
+                new Country("França"),
+                new Country("Alemanha"),
+                new Country("Itália"),
+                new Country("Portugal"),
+                new Country("Reino Unido"),
+                new Country("Estados Unidos"),
+                new Country("Canadá")
+        )
+    );
     public static void main(String[] args) throws InterruptedException {
 
     Debug.logInfo("Starting game");
@@ -38,15 +41,9 @@ public class GameMain {
     new Thread(new Verify()).start();
 
     }
-    public  synchronized void produce() throws InterruptedException {
-
-    }
-    public static synchronized void consume(){
-
-    }
 
 }
-/** Trade message or semaphore?*/
+/** Trade message  or barrier?*/
 class Verify implements Runnable  {
     public void run() {
         while (true){
@@ -61,7 +58,8 @@ class Verify implements Runnable  {
 
                 try {
                     System.out.println("All players are ready");
-                    Thread.sleep(2000);
+                    GameMain.round--;
+                    if (GameMain.DEV_MODE) Thread.sleep(2000);
 
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -70,6 +68,33 @@ class Verify implements Runnable  {
                 }
                 // break;
             }
+            if (GameMain.round ==0){
+                System.out.println("Dominion report");
+                GameMain.countries.forEach(System.out::println);
+                break;
+            };
+
         }
+    }
+}
+/** Custom logic of semaphore*/
+class SemaphoreCustom{
+    private int permits;
+
+    SemaphoreCustom(int permits){
+        this.permits = permits;
+    }
+    public synchronized void acquire() throws InterruptedException {
+        while (permits <= 0) {
+            if (GameMain.DEV_MODE) System.out.println(Thread.currentThread().getName()+" awaiting permission");
+            wait();
+        }
+        System.out.println(Thread.currentThread().getName() + " acquired ");
+        permits--;
+    }
+
+    public synchronized void release() {
+        permits++;
+        notify();
     }
 }

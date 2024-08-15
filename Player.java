@@ -66,7 +66,7 @@ public class Player extends Thread {
 
             synchronized (GameMain.lock){
                 try {
-                    System.out.println("Aguardando outros player");
+                    System.out.println("awaiting other players");
                     GameMain.lock.wait();
                     if (GameMain.DEV_MODE) Thread.sleep(2000);
                 } catch (InterruptedException e) {

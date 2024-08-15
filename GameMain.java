@@ -1,7 +1,5 @@
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
+
 
 //TODO use wait and notify for switch message, create variable type integer for semaphore
 /** Project for operating system matter*/
@@ -59,6 +57,7 @@ class Verify implements Runnable  {
                 try {
                     System.out.println("All players are ready");
                     GameMain.round--;
+                    System.out.println("Round "+GameMain.round);
                     if (GameMain.DEV_MODE) Thread.sleep(2000);
 
                 } catch (InterruptedException e) {
@@ -89,12 +88,13 @@ class SemaphoreCustom{
             if (GameMain.DEV_MODE) System.out.println(Thread.currentThread().getName()+" awaiting permission");
             wait();
         }
-        System.out.println(Thread.currentThread().getName() + " acquired ");
+        System.out.println(Thread.currentThread().getName() + " acquired permission");
         permits--;
     }
 
     public synchronized void release() {
         permits++;
+        System.out.println(Thread.currentThread().getName() + " exit semaphore");
         notify();
     }
 }

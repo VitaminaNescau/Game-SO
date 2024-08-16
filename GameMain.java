@@ -1,31 +1,34 @@
 import java.util.*;
 
 
-//TODO use wait and notify for switch message, create variable type integer for semaphore
-/** Project for operating system matter*/
 public class GameMain {
     static final boolean DEV_MODE = true;
     final static int playerNumber = 8;
     /**Mutex*/
     static final Object lock = new Object();
-    /**Semaphore*/
-    static SemaphoreCustom semaphore = new SemaphoreCustom(2);
+    /**Semáforo*/
+    static SemaphoreCustom semaphore = new SemaphoreCustom(3);
     //static ExecutorService executorService = Executors.newFixedThreadPool(playerNumber);
     static int round = 5;
     static ArrayList<Player> players = new ArrayList<>();
     static ArrayList<Country> countries = new ArrayList<>(
         List.of(
-                new Country("Brasil"),
-                new Country("Espanha"),
-                new Country("França"),
-                new Country("Alemanha"),
-                new Country("Itália"),
+                new Country("Brazil"),
+                new Country("Spain"),
+                new Country("France"),
+                new Country("Germany"),
+                new Country("Italy"),
                 new Country("Portugal"),
-                new Country("Reino Unido"),
-                new Country("Estados Unidos"),
-                new Country("Canadá")
+                new Country("United Kingdom"),
+                new Country("United States"),
+                new Country("Canada")
         )
     );
+    /**
+     * Método principal que inicializa o jogo. Cria e inicia as threads dos jogadores,
+     * e uma thread adicional para verificar o estado dos jogadores.
+     *
+     */
     public static void main(String[] args) throws InterruptedException {
 
     Debug.logInfo("Starting game");
@@ -41,7 +44,11 @@ public class GameMain {
     }
 
 }
-/** Trade message  or barrier?*/
+/**
+ * Classe responsável por verificar o estado das threads dos jogadores.
+ * Implementa a lógica de barreira, esperando que todos os jogadores estejam prontos
+ * antes de avançar para a próxima rodada.
+ */
 class Verify implements Runnable  {
     public void run() {
         while (true){
@@ -76,7 +83,10 @@ class Verify implements Runnable  {
         }
     }
 }
-/** Custom logic of semaphore*/
+/**
+ * Classe que implementa a lógica de um semáforo personalizado.
+ * Controla o número de threads que podem acessar uma seção crítica simultaneamente.
+ */
 class SemaphoreCustom{
     private int permits;
 

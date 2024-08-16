@@ -3,13 +3,17 @@ import java.util.*;
 public class Player extends Thread {
 
     public String name;
-    public int score = 100;
-    public Set<Country> domains = new HashSet<Country>();
     public Player(String name) {
         super(name);
         this.name = name;
     }
-
+    /**
+     * Método que gera um ataque de dano aleatório no intervalo de 0 a 99.
+     * O método utiliza um semáforo para garantir que apenas uma thread possa
+     * realizar um ataque de cada vez.
+     *
+     * @return Um valor inteiro representando o dano do ataque.
+     */
     public int randomDamageAttack(){
         try {
             GameMain.semaphore.acquire();
@@ -26,12 +30,12 @@ public class Player extends Thread {
     public void run() {
         System.out.println(name + " starting... "+System.currentTimeMillis());
         while(true){
-            int number = new Random().nextInt(GameMain.playerNumber);
+            int number = new Random().nextInt(GameMain.playerNumber+1);
 
             if (GameMain.countries.get(number).GetDomain() == null){
                 try {
                     GameMain.countries.get(number).SetDomain(name);
-                    domains.add(GameMain.countries.get(number));
+
                     break;
                 }catch (RuntimeException e){
                     System.out.println(name + e.getMessage());
@@ -40,7 +44,7 @@ public class Player extends Thread {
             }
         }
 
-
+        // Espera até que todos os jogadores estejam prontos para iniciar a rodada
         synchronized (GameMain.lock){
             try {
                 System.out.println(Thread.currentThread().getName()+" Waiting...");
@@ -50,6 +54,8 @@ public class Player extends Thread {
                 throw new RuntimeException(e);
             }
         }
+        // Realiza ataques em outros países enquanto houverem rodadas restantes
+
         while(GameMain.round >0) {
             int number = new Random().nextInt(GameMain.countries.size());
 
@@ -63,7 +69,7 @@ public class Player extends Thread {
 
                 GameMain.semaphore.release();
             }
-
+            // Espera até que todos os jogadores tenham completado suas ações na rodada atual
             synchronized (GameMain.lock){
                 try {
                     System.out.println("awaiting other players");
